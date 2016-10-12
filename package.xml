@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<package>
+  <name>pr2_motors_analyzer</name>
+  <version>0.0.0</version>
+  <description>The pr2_motors_analyzer package</description>
+
+  <maintainer email="5jonetzk@informatik.uni-hamburg.de">Yannick Jonetzko</maintainer>
+  <author email="5jonetzk@informatik.uni-hamburg.de">Yannick Jonetzko</author>
+
+  <license>BSD</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>diagnostic_aggregator</build_depend>
+  <build_depend>diagnostic_msgs</build_depend>
+  <build_depend>pluginlib</build_depend>
+  <build_depend>roscpp</build_depend>
+
+  <run_depend>diagnostic_aggregator</run_depend>
+  <run_depend>diagnostic_msgs</run_depend>
+  <run_depend>pluginlib</run_depend>
+  <run_depend>roscpp</run_depend>
+
+  <export>
+    <diagnostic_aggregator plugin="${prefix}/pr2_motors_analyzer_plugin.xml" />
+  </export>
+</package>
