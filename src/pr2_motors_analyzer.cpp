@@ -1,9 +1,11 @@
 #include "pr2_motors_analyzer/pr2_motors_analyzer.h"
 
+using namespace pr2_motors_analyzer;
+
 using namespace diagnostic_aggregator;
 
 PLUGINLIB_REGISTER_CLASS(PR2MotorsAnalyzer,  
-                         diagnostic_aggregator::PR2MotorsAnalyzer, 
+                         pr2_motors_analyzer::PR2MotorsAnalyzer,
                          diagnostic_aggregator::Analyzer)
 
 PR2MotorsAnalyzer::PR2MotorsAnalyzer() :

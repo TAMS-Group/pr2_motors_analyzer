@@ -8,9 +8,9 @@
 #include <pluginlib/class_list_macros.h>
 #include <string>
 
-namespace diagnostic_aggregator {
+namespace pr2_motors_analyzer {
 
-class PR2MotorsAnalyzer : public Analyzer
+class PR2MotorsAnalyzer : public diagnostic_aggregator::Analyzer
 {
 public:
   PR2MotorsAnalyzer();
@@ -21,7 +21,7 @@ public:
 
   bool match(const std::string name);
 
-  bool analyze(const boost::shared_ptr<StatusItem> item);
+  bool analyze(const boost::shared_ptr<diagnostic_aggregator::StatusItem> item);
 
   std::vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > report();
 
@@ -32,7 +32,7 @@ public:
 private:
 
   // Store status item for EtherCAT master
-  boost::shared_ptr<StatusItem> eth_master_item_;
+  boost::shared_ptr<diagnostic_aggregator::StatusItem> eth_master_item_;
 
   std::string path_, nice_name_, power_board_name_;
 
