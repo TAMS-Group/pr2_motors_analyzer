@@ -1,8 +1,11 @@
-#include "pr2_motors_analyzer/pr2_motors_analyzer.h"
+#include <pr2_motors_analyzer/pr2_motors_analyzer.h>
+
+#include <diagnostic_msgs/DiagnosticStatus.h>
+#include <diagnostic_msgs/KeyValue.h>
 
 using namespace pr2_motors_analyzer;
 
-using namespace diagnostic_aggregator;
+using diagnostic_aggregator::StatusItem;
 
 PLUGINLIB_REGISTER_CLASS(PR2MotorsAnalyzer,  
                          pr2_motors_analyzer::PR2MotorsAnalyzer,
@@ -35,10 +38,9 @@ bool PR2MotorsAnalyzer::init(const std::string base_name, const ros::NodeHandle 
 
 bool PR2MotorsAnalyzer::match(const std::string name)
 {
-  if (name == "EtherCAT Master")
-    return true;
-
-  return name == power_board_name_;
+  return name == "EtherCAT Master"
+      || name.find("EtherCAT Device") == 0
+      || name == power_board_name_;
 }
 
 bool PR2MotorsAnalyzer::analyze(const boost::shared_ptr<StatusItem> item)
@@ -48,22 +50,66 @@ bool PR2MotorsAnalyzer::analyze(const boost::shared_ptr<StatusItem> item)
     runstop_hit_ = item->getValue("RunStop Button Status") != "True" || item->getValue("RunStop Wireless Status") != "True";
     return false; // Won't report this item
   }
-  else
+
+  if (item->getName() == "EtherCAT Master")
   {
     eth_master_item_ = item;
     return true;
   }
+
+  eth_dev_items_[item->getName()] = item;
+  return true;
+}
+
+namespace {
+void update_top_level_stat(diagnostic_msgs::DiagnosticStatus& tls, diagnostic_msgs::DiagnosticStatus child)
+{
+  tls.level = std::min(tls.level, child.level);
+
+  diagnostic_msgs::KeyValue kv;
+  kv.key = child.name;
+  kv.value = diagnostic_aggregator::valToMsg(child.level);
+  tls.values.push_back(kv);
+}
 }
 
 std::vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > PR2MotorsAnalyzer::report()
 {
-  boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> eth_stat = eth_master_item_->toStatusMsg(path_);
+  std::vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > stats;
 
-  if(runstop_hit_)
+  // There has to be a top level status for path_ to see the stats in the tree of the robot_monitor
+  boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> top_level_status(new diagnostic_msgs::DiagnosticStatus);
+  top_level_status->name = path_;
+  top_level_status->level = diagnostic_msgs::DiagnosticStatus::OK;
+
+  // report EtherCAT Master
+  boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> s = eth_master_item_->toStatusMsg(path_);
+  if(runstop_hit_ && "Motors halted (device error)")
+    s->level = diagnostic_msgs::DiagnosticStatus::OK;
+  update_top_level_stat(*top_level_status, *s);
+
+  stats.push_back(s);
+
+  // report EtherCAT devices
+  for(std::map<std::string, boost::shared_ptr<diagnostic_aggregator::StatusItem> >::const_iterator it = eth_dev_items_.begin();
+      it != eth_dev_items_.end();
+      ++it)
   {
-    eth_stat->level = diagnostic_msgs::DiagnosticStatus::WARN;
-    eth_stat->message = "Emergency stop is pressed";
+    boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> s = it->second->toStatusMsg(path_);
+    if( runstop_hit_ && s->message == "Safety Lockout: UNDERVOLTAGE")
+      s->level = diagnostic_msgs::DiagnosticStatus::OK;
+    update_top_level_stat(*top_level_status, *s);
+    stats.push_back(s);
   }
 
-  return std::vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> >(1, eth_stat);
+  // report runstop pressed if there is nothing else to report
+  if(runstop_hit_ && top_level_status->level == diagnostic_msgs::DiagnosticStatus::OK)
+  {
+    top_level_status->level = diagnostic_msgs::DiagnosticStatus::WARN;
+    top_level_status->message = "Emergency stop is pressed";
+  }
+
+  stats.push_back(top_level_status);
+
+  return stats;
 }

@@ -7,6 +7,7 @@
 #include <diagnostic_msgs/DiagnosticStatus.h>
 #include <pluginlib/class_list_macros.h>
 #include <string>
+#include <map>
 
 namespace pr2_motors_analyzer {
 
@@ -33,6 +34,8 @@ private:
 
   // Store status item for EtherCAT master
   boost::shared_ptr<diagnostic_aggregator::StatusItem> eth_master_item_;
+
+  std::map< std::string, boost::shared_ptr<diagnostic_aggregator::StatusItem> > eth_dev_items_;
 
   std::string path_, nice_name_, power_board_name_;
 
