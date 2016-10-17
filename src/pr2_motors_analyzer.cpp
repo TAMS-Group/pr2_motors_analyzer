@@ -18,7 +18,7 @@ PR2MotorsAnalyzer::~PR2MotorsAnalyzer() { }
 bool PR2MotorsAnalyzer::init(const std::string base_name, const ros::NodeHandle &n)
 { 
   // path_ = BASE_NAME/Motors
-  path_ = base_name + "/" + nice_name_;
+  path_ = base_name + nice_name_;
 
   if (!n.getParam("power_board_name", power_board_name_))
   {
