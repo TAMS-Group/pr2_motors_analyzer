@@ -17,3 +17,6 @@ include_directories(
 
 add_library(pr2_motors_analyzer src/pr2_motors_analyzer)
 target_link_libraries(pr2_motors_analyzer ${catkin_LIBRARIES})
+
+install(TARGETS pr2_motors_analyzer DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION})
+install(FILES pr2_motors_analyzer_plugin.xml DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
