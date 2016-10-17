@@ -1,5 +1,5 @@
 <library path="lib/libpr2_motors_analyzer" >
-  <class name="PR2MotorsAnalyzer" type="pr2_motors_analyzer::PR2MotorsAnalyzer" base_class_type="diagnostic_aggregator::Analyzer">
+  <class name="pr2_motors_analyzer/PR2MotorsAnalyzer" type="pr2_motors_analyzer::PR2MotorsAnalyzer" base_class_type="diagnostic_aggregator::Analyzer">
     <description>
       An analyzer for the diagnostics messages of the PR2, that takes into account the state of the runstop buttons.
     </description>
