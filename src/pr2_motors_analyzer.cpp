@@ -64,7 +64,7 @@ bool PR2MotorsAnalyzer::analyze(const boost::shared_ptr<StatusItem> item)
 namespace {
 void update_top_level_stat(diagnostic_msgs::DiagnosticStatus& tls, diagnostic_msgs::DiagnosticStatus child)
 {
-  tls.level = std::min(tls.level, child.level);
+  tls.level = std::max(tls.level, child.level);
 
   diagnostic_msgs::KeyValue kv;
   kv.key = child.name;
@@ -84,7 +84,7 @@ std::vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > PR2MotorsAnal
 
   // report EtherCAT Master
   boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> s = eth_master_item_->toStatusMsg(path_);
-  if(runstop_hit_ && "Motors halted (device error)")
+  if(runstop_hit_ && (s->message == "Motors halted (device error)" || s->message == "Motors halted soon after reset (device error)"))
     s->level = diagnostic_msgs::DiagnosticStatus::OK;
   update_top_level_stat(*top_level_status, *s);
 
@@ -95,7 +95,7 @@ std::vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > PR2MotorsAnal
       it != eth_dev_items_.end();
       ++it)
   {
-    boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> s = it->second->toStatusMsg(path_);
+    s = it->second->toStatusMsg(path_);
     if( runstop_hit_ && s->message == "Safety Lockout: UNDERVOLTAGE")
       s->level = diagnostic_msgs::DiagnosticStatus::OK;
     update_top_level_stat(*top_level_status, *s);
@@ -108,6 +108,8 @@ std::vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > PR2MotorsAnal
     top_level_status->level = diagnostic_msgs::DiagnosticStatus::WARN;
     top_level_status->message = "Emergency stop is pressed";
   }
+  else
+    top_level_status->message = diagnostic_aggregator::valToMsg(top_level_status->level);
 
   stats.push_back(top_level_status);
 
