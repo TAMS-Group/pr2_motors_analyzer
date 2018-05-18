@@ -7,19 +7,19 @@ using namespace pr2_motors_analyzer;
 
 using diagnostic_aggregator::StatusItem;
 
-PLUGINLIB_REGISTER_CLASS(PR2MotorsAnalyzer,  
+PLUGINLIB_REGISTER_CLASS(PR2MotorsAnalyzer,
                          pr2_motors_analyzer::PR2MotorsAnalyzer,
                          diagnostic_aggregator::Analyzer)
 
 PR2MotorsAnalyzer::PR2MotorsAnalyzer() :
-  path_(""), nice_name_("Motors"), power_board_name_(""), 
+  path_(""), nice_name_("Motors"), power_board_name_(""),
   runstop_hit_(false)
 { }
 
 PR2MotorsAnalyzer::~PR2MotorsAnalyzer() { }
 
 bool PR2MotorsAnalyzer::init(const std::string base_name, const ros::NodeHandle &n)
-{ 
+{
   // path_ = BASE_NAME/Motors
   path_ = base_name + nice_name_;
 
