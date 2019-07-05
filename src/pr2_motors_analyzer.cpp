@@ -1,15 +1,13 @@
 #include <pr2_motors_analyzer/pr2_motors_analyzer.h>
 
+#include <diagnostic_aggregator/analyzer.h>
+
 #include <diagnostic_msgs/DiagnosticStatus.h>
 #include <diagnostic_msgs/KeyValue.h>
 
-using namespace pr2_motors_analyzer;
+namespace pr2_motors_analyzer {
 
 using diagnostic_aggregator::StatusItem;
-
-PLUGINLIB_REGISTER_CLASS(PR2MotorsAnalyzer,
-                         pr2_motors_analyzer::PR2MotorsAnalyzer,
-                         diagnostic_aggregator::Analyzer)
 
 PR2MotorsAnalyzer::PR2MotorsAnalyzer() :
   path_(""), nice_name_("Motors"), power_board_name_(""),
@@ -115,3 +113,7 @@ std::vector<boost::shared_ptr<diagnostic_msgs::DiagnosticStatus> > PR2MotorsAnal
 
   return stats;
 }
+
+}
+
+PLUGINLIB_EXPORT_CLASS(pr2_motors_analyzer::PR2MotorsAnalyzer, diagnostic_aggregator::Analyzer)
